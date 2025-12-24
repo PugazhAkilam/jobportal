@@ -20,7 +20,7 @@ model User {
   name      String
   email     String   @unique
   password  String?
-  googleId  String?
+  googleId  String?  @unique
   role      Role     @default(USER)
 
   resumes      Resume[]
@@ -28,6 +28,7 @@ model User {
   applications Application[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Resume {
@@ -39,13 +40,18 @@ model Resume {
   user   User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Job {
-  id          Int    @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   title       String
-  description String
+  description String  @db.Text
   company     String
+  location    String?
+  salary      String?
+  skills      String?
+  status      String  @default("OPEN")
 
   recruiterId Int
   recruiter   User @relation("RecruiterJobs", fields: [recruiterId], references: [id])
@@ -53,11 +59,13 @@ model Job {
   applications Application[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Application {
-  id     Int    @id @default(autoincrement())
-  status String @default("APPLIED")
+  id         Int    @id @default(autoincrement())
+  status     String @default("APPLIED")
+  resumeFile String?
 
   userId Int
   jobId  Int
@@ -66,13 +74,18 @@ model Application {
   job  Job  @relation(fields: [jobId], references: [id])
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, jobId])
 }
 
 model Chat {
   id         Int    @id @default(autoincrement())
   senderId   Int
   receiverId Int
-  message    String
+  message    String @db.Text
 
   createdAt DateTime @default(now())
+
+  @@index([senderId, receiverId])
 }
